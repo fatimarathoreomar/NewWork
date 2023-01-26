@@ -1,14 +1,30 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity,LayoutAnimation } from 'react-native';
-import {Input, NativeBaseProvider, Button, Icon, Box, Image, useStyledSystemPropsResolver, Center} from 'native-base';
+import {Input, NativeBaseProvider, Button, Icon, Box, Image, useStyledSystemPropsResolver, Center, KeyboardAvoidingView,keyboard} from 'native-base';
 import { FontAwesome5 ,MaterialCommunityIcons} from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
-
+import {  useRef,useState } from 'react';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 const Signup = () => {
     const navigation = useNavigation();
-    return (
 
+    LayoutAnimation.easeInEaseOut();
+    const [isLoading, setLoading] = useState(false);
+    const [emailInput, setEmail]= useState('');
+    const [passwordInput, setPassword]=useState('');
+    const [UsernameInput, setUsername]= useState('');
+    const [ConfirmPasswordInput, setConfirmPassword]=useState('');
+    const [validPassword, setPasswordValid] = useState(true);
+    const [validEmail, setEmailValid] = useState(true);
+
+
+    const handleSignUp = () =>{
+        console.log(UsernameInput)
+        
+    }
+    
+    return (
+      <KeyboardAwareScrollView>
         <View >
 
 
@@ -22,9 +38,13 @@ const Signup = () => {
           
           
           {/* username */}
+          
           <View style={styles.buttonStyle}>
             <View style={styles.emailInput}>
                 <Input
+                    refInput={(input) => (UsernameInput = input)}
+                    value={UsernameInput}
+                    onChangeText={(text: string) => setUsername(text)}
                     InputLeftElement={
                         <Icon
                              as={<FontAwesome5 name="user-secret"/>}
@@ -55,6 +75,9 @@ const Signup = () => {
          <View style={styles.buttonStyleX}>
             <View style={styles.emailInput}>
                 <Input
+                    refInput={(input) => (emailInput = input)}
+                    value={emailInput}
+                    onChangeText={(text: string) => setEmail(text)}
                     InputLeftElement={
                         <Icon
                             as= {<MaterialCommunityIcons name="email" />}
@@ -85,6 +108,9 @@ const Signup = () => {
          <View style={styles.buttonStyleX}>
              <View style={styles.emailInput}>
                  <Input
+                     refInput={(input) => (passwordInput= input)}
+                     value={passwordInput}
+                     onChangeText={(text: string) => setPassword(text)}
                      InputLeftElement={
                          <Icon
                              as={<FontAwesome5 name="key"/>}
@@ -118,6 +144,9 @@ const Signup = () => {
          <View style={styles.buttonStyleX}>
              <View style={styles.emailInput}>
                  <Input
+                    refInput={(input) => (ConfirmPasswordInput= input)}
+                     value={ConfirmPasswordInput}
+                     onChangeText={(text: string) => setConfirmPassword(text)}
                      InputLeftElement={
                          <Icon
                              as={<FontAwesome5 name="key"/>}
@@ -133,7 +162,7 @@ const Signup = () => {
                      }
                      variant = "outline"
                      secureTextEntry={true}
-                     placeholder="Repeat password"
+                     placeholder="Confirm password"
                      _light={{
                          placeholderTextColor:"blueGray.400"
                      }}
@@ -149,9 +178,11 @@ const Signup = () => {
 
          {/* button */}
          <View style={styles.Middle}>
-             <Button style={styles.RegisterButton}>
+            
+            <Button style={styles.RegisterButton} onPress={handleSignUp} >
                 Register 
              </Button>
+             
 
          </View>
 
@@ -164,8 +195,9 @@ const Signup = () => {
 
 
 
-
+          
         </View>
+        </KeyboardAwareScrollView>
     )
 }
 
@@ -181,8 +213,8 @@ export default ()=> {
 const styles= StyleSheet.create({
   container: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      //alignItems: 'center',
+     // justifyContent: 'center',
     },
   
   LoginTexttop:{
@@ -266,7 +298,5 @@ cname: {
     // fontFamily: 'UbuntuLight',
     textAlign: 'center',
   },
-
-
-  
+    
 })

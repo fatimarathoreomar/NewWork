@@ -1,37 +1,95 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity,LayoutAnimation } from 'react-native';
-import {Input, NativeBaseProvider, Button, Icon, Box, Image, useStyledSystemPropsResolver, Center} from 'native-base';
+import {  useRef,useState } from 'react';
+import { View,Dimensions, Text, StyleSheet, TouchableOpacity,LayoutAnimation,Alert,ImageSourcePropType,TextInput,TextInputProps,  UIManager,} from 'react-native';
+import { NativeBaseProvider,Input, Button, Icon, Box, Image, useStyledSystemPropsResolver, Center} from 'native-base';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import {LinearGradient} from 'expo-linear-gradient';
-//type LoginScreenProps = {};
-// const [username, setUsername] = useState<string>('');
-// const [email, setEmail] = useState<string>('');
-// const [password, setPassword] = useState<string>('');
-// const [validEmail, setEmailValid] = useState<boolean>(true);
-// const [validPassword, setPasswordValid] = useState<boolean>(true);
-// const [validUsername, setUsernameValid] = useState<boolean>(true);
- // Enable LayoutAnimation on Android
-// UIManager.setLayoutAnimationEnabledExperimental &&
-// UIManager.setLayoutAnimationEnabledExperimental(true);
+import { InputProps } from '@rneui/themed';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+
+
+
+type LoginScreenProps = {};
+
+// Enable LayoutAnimation on Android
+UIManager.setLayoutAnimationEnabledExperimental &&
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+  const SCREEN_WIDTH = Dimensions.get('window').width;
+  const SCREEN_HEIGHT = Dimensions.get('window').height;
+  
+   let EmailInput = useRef<InputProps>(null);
+   let PasswordInput = useRef<InputProps>(null);
+
+
 
 const Login = () => {
     const navigation = useNavigation();
+    LayoutAnimation.easeInEaseOut();
+   const [isLoading, setLoading] = useState(false);
+   const [emailInput, setEmail]= useState('');
+   const [passwordInput, setPassword]=useState('');
+   const [validPassword, setPasswordValid] = useState(true);
+   const [validEmail, setEmailValid] = useState(true);
+   
+   const validatePassword = () => {
+    const passwordCheck = PasswordInput.length >= 8;
+    LayoutAnimation.easeInEaseOut();
+    setPasswordValid(passwordCheck);
+    //passwordCheck || PasswordInput.shake();
+    //check here if password matches firebase password
+    return passwordCheck;
+  };
+
+  const validateEmail = () => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const emailCheck = re.test(EmailInput);
+    LayoutAnimation.easeInEaseOut();
+    setEmailValid(emailCheck);
+    //emailCheck || EmailInput.shake();
+    //check here if email matches firebase 
+    return emailCheck;
+  };
+
     
+    //Login button handler
+    function LoginButtonHandler(){
+        //console.log(passwordInput)
+        LayoutAnimation.easeInEaseOut();
+          
+        //const usernameValid = validateUsername();
+        const emailValid = validateEmail();
+        const passwordValid = validatePassword();
+        console.log(emailInput)
+      
+        if ( emailValid && passwordValid )
+            {
+            console.log(emailInput)
+             setLoading(true);
+            //  
+          
+        }
+
+    }
+    function EmailInputHandler(enteredText){
+        setEmail(enteredText);
+    }
+    function PasswordInputHandler(enteredText){
+        setPassword(enteredText);
+    }
+
+    
+
+   
+   
+
+
+
     return (
-        //background: linear-gradient(90deg, #FDBB2D 0%, #3A1C71 100%);
-        //background: linear-gradient(90deg, #0700b8 0%, #00ff88 100%);
-         <View >
-         {/* //background: linear-gradient(90deg, #FDBB2D 0%, #3A1C71 100%);
-          //background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%); */}
-          {/* <LinearGradient
-        //colors={[ '#3A1C71','#FDBB2D']}
-        //colors={[ '#00ff88','#0700b8']}
-        colors={[ '#FDBB2D','#3adb76']}
-        style={styles.linearGradient}
-        start={{ x: 0, y: 0.5 }}
-        end={{ x: 1, y: 0.5 }}
-       > */}
+        <KeyboardAwareScrollView>
+          <View >
+         
          <View style={styles.Middle} >
              <Image   style={styles.img} alt='some value' source={require('../assets/images/logo.png')} />
              <Text style={styles.cname}>WorkNow</Text>
@@ -40,6 +98,15 @@ const Login = () => {
          <View style={styles.buttonStyle}>
             <View style={styles.emailInput}>
                 <Input
+                     refInput={(input) => (emailInput = input)}
+                      value={emailInput}
+                      onChangeText={(text: string) => setEmail(text)}
+                      returnKeyType="next"
+                     errorMessage={validEmail ? '' : "This field can't be blank"}
+                     onSubmitEditing={() => {
+                     validateEmail();
+                     //EmailInput.focus();
+                     }}
                     InputLeftElement={
                         <Icon
                              as={<FontAwesome5 name="user-secret"/>}
@@ -54,8 +121,9 @@ const Login = () => {
                         />
                 
                     }
+                    
                      variant = "outline"
-                     placeholder = "Email or Username"
+                     placeholder = "Email"
                      _light={{
                      placeholderTextColor: "blueGray.400"
                     }}
@@ -70,6 +138,20 @@ const Login = () => {
          <View style={styles.buttonStyleX}>
              <View style={styles.emailInput}>
                  <Input
+                    secureTextEntry={true}
+                    refInput={(input) => (passwordInput = input)}
+                    onChangeText={(text: string) => setPassword(text)}
+                    returnKeyType="next"
+                    value={passwordInput}
+                  
+                     returnKeyType="next"
+                     errorMessage={
+                        validPassword ? '' : 'Please enter at least 8 characters'
+                         }
+                    onSubmitEditing={() => {
+                        validatePassword();
+                        //PasswordInput.focus();
+                        }}
                      InputLeftElement={
                          <Icon
                              as={<FontAwesome5 name="key"/>}
@@ -84,7 +166,6 @@ const Login = () => {
                          />
                      }
                      variant = "outline"
-                     secureTextEntry={true}
                      placeholder="password"
                      _light={{
                          placeholderTextColor:"blueGray.400"
@@ -99,7 +180,11 @@ const Login = () => {
          </View>
           
         <View style={styles.Middle}>
-             <Button style={styles.LoginButton}>
+             <Button 
+             style={styles.LoginButton}
+             onPress={LoginButtonHandler}
+            
+            >
                 LOGIN
              </Button>
 
@@ -116,6 +201,7 @@ const Login = () => {
       
      {/* </LinearGradient>  */}
     </View> 
+    </KeyboardAwareScrollView>
     )
 }
 
@@ -208,13 +294,11 @@ const styles= StyleSheet.create({
         alignItems: 'center',
       },
       alreadyAccountText: {
-        // fontFamily: 'UbuntuLightItalic',
         fontSize: 12,
         color: 'white',
       },
       loginHereText: {
         color: '#FF9800',
-        // fontFamily: 'UbuntuLightItalic',
         fontSize: 12,
       },
     boxStyle:{
@@ -225,6 +309,9 @@ const styles= StyleSheet.create({
         justifyContent:'space-around'
 
 
+    },
+    error:{
+      color: "red",
     },
     
 

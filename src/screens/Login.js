@@ -18,60 +18,74 @@ UIManager.setLayoutAnimationEnabledExperimental &&
   const SCREEN_WIDTH = Dimensions.get('window').width;
   const SCREEN_HEIGHT = Dimensions.get('window').height;
   
-   let EmailInput = useRef<InputProps>(null);
-   let PasswordInput = useRef<InputProps>(null);
-
+  
 
 
 const Login = () => {
     const navigation = useNavigation();
-    LayoutAnimation.easeInEaseOut();
-   const [isLoading, setLoading] = useState(false);
-   const [emailInput, setEmail]= useState('');
-   const [passwordInput, setPassword]=useState('');
-   const [validPassword, setPasswordValid] = useState(true);
-   const [validEmail, setEmailValid] = useState(true);
    
-   const validatePassword = () => {
-    const passwordCheck = PasswordInput.length >= 8;
-    LayoutAnimation.easeInEaseOut();
-    setPasswordValid(passwordCheck);
-    //passwordCheck || PasswordInput.shake();
-    //check here if password matches firebase password
-    return passwordCheck;
-  };
+   const [fdata,setFdata] = useState({
+    email: '',
+    password:'',
+   })
+  const [errormsg, setErrormsg] = useState(null);
+   
 
-  const validateEmail = () => {
-    const re =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const emailCheck = re.test(EmailInput);
-    LayoutAnimation.easeInEaseOut();
-    setEmailValid(emailCheck);
-    //emailCheck || EmailInput.shake();
-    //check here if email matches firebase 
-    return emailCheck;
-  };
+
 
     
     //Login button handler
     function LoginButtonHandler(){
-        //console.log(passwordInput)
-        LayoutAnimation.easeInEaseOut();
-          
-        //const usernameValid = validateUsername();
-        const emailValid = validateEmail();
-        const passwordValid = validatePassword();
-        console.log(emailInput)
-      
-        if ( emailValid && passwordValid )
-            {
-            console.log(emailInput)
-             setLoading(true);
-            //  
-          
+       
+        console.log("Inside login button handler");
+        const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  
+        if (fdata.password == '' || fdata.email == ''){
+            setErrormsg('All fields are required');
+            return;
+
         }
+        else if(!fdata.email.match(re)){
+            setErrormsg('email syntax not correct');
+            return;
+        }
+        else{
+            Sendtobackend();
+        }
+       
 
     }
+
+    const Sendtobackend = () => {
+
+        console.log(fdata);
+           fetch('http://192.168.1.98:3000/login',{
+               method : 'POST',
+               headers : {
+                   'Content-Type':'application/json'
+               },
+               body: JSON.stringify(fdata)
+
+           }).then(res => res.json()).then(
+            data => {
+                //console.log(data);
+                if (data.error) {
+                    setErrormsg(data.error);
+                }
+                else{
+                    //dispatchEvent(setUser(fdata));
+                    alert('Login Sucessful');
+                    //call get function
+                    //GetProfileinfo();
+                    navigation.navigate("FreelancerProfile",{fdata});
+                }
+            }
+        )
+
+
+    }
+    
     function EmailInputHandler(enteredText){
         setEmail(enteredText);
     }
@@ -79,12 +93,23 @@ const Login = () => {
         setPassword(enteredText);
     }
 
-    
+    const GetProfileinfo = () => {
+        fetch('http://192.168.1.98:3000/freelancerprofile',{
+           method : 'POST',
+           headers : {
+               'Content-Type':'application/json'
+           },
+           body: JSON.stringify(fdata)
 
-   
-   
+       }).then(response => response.json())
+       .then(data => {
+         console.log('helloooo');
+         return data;
+        
+       })
+       .catch(error => console.error(error));
 
-
+    } 
 
     return (
         <KeyboardAwareScrollView>
@@ -98,15 +123,9 @@ const Login = () => {
          <View style={styles.buttonStyle}>
             <View style={styles.emailInput}>
                 <Input
-                     refInput={(input) => (emailInput = input)}
-                      value={emailInput}
-                      onChangeText={(text: string) => setEmail(text)}
+                      onChangeText={(text) => setFdata({...fdata,email:text.trim()})}
                       returnKeyType="next"
-                     errorMessage={validEmail ? '' : "This field can't be blank"}
-                     onSubmitEditing={() => {
-                     validateEmail();
-                     //EmailInput.focus();
-                     }}
+                      onPressIn={() => setErrormsg(null)}
                     InputLeftElement={
                         <Icon
                              as={<FontAwesome5 name="user-secret"/>}
@@ -123,7 +142,7 @@ const Login = () => {
                     }
                     
                      variant = "outline"
-                     placeholder = "Email"
+                     placeholder = "Input Email"
                      _light={{
                      placeholderTextColor: "blueGray.400"
                     }}
@@ -139,20 +158,10 @@ const Login = () => {
              <View style={styles.emailInput}>
                  <Input
                     secureTextEntry={true}
-                    refInput={(input) => (passwordInput = input)}
-                    onChangeText={(text: string) => setPassword(text)}
+                    onChangeText={(text) => setFdata({...fdata,password:text})}
                     returnKeyType="next"
-                    value={passwordInput}
-                  
-                     returnKeyType="next"
-                     errorMessage={
-                        validPassword ? '' : 'Please enter at least 8 characters'
-                         }
-                    onSubmitEditing={() => {
-                        validatePassword();
-                        //PasswordInput.focus();
-                        }}
-                     InputLeftElement={
+                    onPressIn={() => setErrormsg(null)}
+                    InputLeftElement={
                          <Icon
                              as={<FontAwesome5 name="key"/>}
                              size="sm"
@@ -166,7 +175,7 @@ const Login = () => {
                          />
                      }
                      variant = "outline"
-                     placeholder="password"
+                     placeholder="Input password"
                      _light={{
                          placeholderTextColor:"blueGray.400"
                      }}
@@ -178,15 +187,22 @@ const Login = () => {
 
              </View>
          </View>
+
+         <View style={styles.forgotpassword}>
+          
+          <TouchableOpacity onPress={()=> navigation.navigate("ForgotPassword")}>
+              <Text style={styles.signupText}> Forgot password?</Text>
+          </TouchableOpacity>
+        </View> 
           
         <View style={styles.Middle}>
-             <Button 
+            <TouchableOpacity
              style={styles.LoginButton}
              onPress={LoginButtonHandler}
             
             >
-                LOGIN
-             </Button>
+               <Text style={styles.loginHereText}>LOGIN</Text>
+             </TouchableOpacity>
 
          </View> 
 
@@ -198,6 +214,10 @@ const Login = () => {
               <Text style={styles.signupText}> Sign up</Text>
           </TouchableOpacity>
         </View> 
+
+        {
+            errormsg ? <Text style={styles.error}>{errormsg}</Text>:null
+        }
       
      {/* </LinearGradient>  */}
     </View> 
@@ -230,6 +250,14 @@ const styles= StyleSheet.create({
         fontWeight:'bold',
         // fontFamily: 'UbuntuLight',
         textAlign: 'center',
+      },
+      forgotpassword: {
+        paddingTop:5,
+        //alignItems:'right',
+        marginLeft:260,
+        marginBottom:5,
+        color:"gray",
+       
       },
     LoginText:{
         
@@ -298,8 +326,11 @@ const styles= StyleSheet.create({
         color: 'white',
       },
       loginHereText: {
-        color: '#FF9800',
-        fontSize: 12,
+        color: '#FFFFFF',
+        fontWeight:'bold',
+        fontSize: 20,
+        textAlign: 'center',
+        paddingTop: 10,
       },
     boxStyle:{
         flexDirection:'row',
@@ -312,6 +343,10 @@ const styles= StyleSheet.create({
     },
     error:{
       color: "red",
+      textAlign: 'center',
+      fontSize: 15,
+      paddingTop: 15,
+      
     },
     
 

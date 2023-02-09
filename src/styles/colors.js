@@ -2,8 +2,10 @@ export const PRIMARY = '#1779ba';//blue
 export const SECONDARY = '#767676';//gery
 export const WHITE = '#FFFFFF';
 export const BLACK = '#000000';
-export const TERTIARY ='ffae00';
-export const TERTIARY2 ='cc4b37';
+export const TERTIARY ='oc1446';
+export const TERTIARY2 ='87aca3';
+export const TERTIARY3 ='287c85';
+export const TERTIARY4 ='175873';
 
 // ACTIONS
 export const SUCCESS = '#3adb76';//parrot green
